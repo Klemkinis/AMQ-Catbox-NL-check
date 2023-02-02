@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Catbox NL check
-// @version      0.2
+// @version      0.3
 // @match        https://animemusicquiz.com/admin/approveVideos
 // @match        https://animemusicquiz.com/admin/approveVideos?skipMp3=true
 // @updateURL    https://github.com/Klemkinis/AMQ-Catbox-NL-check/raw/main/Catbox%20NL%20check.user.js
@@ -9,27 +9,43 @@
 // @run-at: document-end
 // ==/UserScript==
 
+var isNAAvailable = undefined
 var catboxLink = getSongLink()
+checkCatboxNAStatus(catboxLink)
+
+var isNLAvailable = undefined
 var nlLink = catboxLink.replace("files.", "nl.")
 checkCatboxNLStatus(nlLink)
 
 function checkCatboxNLStatus(songLink) {
-    console.log(songLink)
     GM_xmlhttpRequest({
         method: "HEAD",
         url: songLink,
         onload: function(response) {
-            displayCatboxNLStatus(response.status == 200)
+            isNLAvailable = response.status == 200
+            displayCatboxStatus()
         }
     })
 }
 
-function displayCatboxNLStatus(isAvailable) {
+function checkCatboxNAStatus(songLink) {
+    GM_xmlhttpRequest({
+        method: "HEAD",
+        url: songLink,
+        onload: function(response) {
+            isNAAvailable = response.status == 200
+            displayCatboxStatus()
+        }
+    })
+}
+
+function displayCatboxStatus() {
+    if (isNAAvailable == undefined) { return }
+    if (isNLAvailable == undefined) { return }
     var songInfoTable = getSongInfoTable()
-    var nlStatusRow = songInfoTable.insertRow()
-    nlStatusRow.insertCell(0).innerHTML = "NL status"
-	nlStatusRow.insertCell(1).innerHTML = isAvailable ? "Available" : "Missing"
-    nlStatusRow.cells[1].style.color = isAvailable ? "lightgreen" : "red"
+    var statusRow = songInfoTable.insertRow()
+    statusRow.insertCell(0).innerHTML = "Catbox"
+    statusRow.insertCell(1).innerHTML = "<span style='color:" + (isNLAvailable ? "lightgreen" : "red") + "';>Europe</span> | <span style='color:" + (isNAAvailable ? "lightgreen" : "red") + "';>America</span>"
 }
 
 function getSongLink() {
