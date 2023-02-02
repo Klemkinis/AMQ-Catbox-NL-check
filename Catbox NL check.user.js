@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Catbox NL check
-// @version      0.3
+// @version      0.4
 // @match        https://animemusicquiz.com/admin/approveVideos
 // @match        https://animemusicquiz.com/admin/approveVideos?skipMp3=true
 // @updateURL    https://github.com/Klemkinis/AMQ-Catbox-NL-check/raw/main/Catbox%20NL%20check.user.js
@@ -21,6 +21,7 @@ function checkCatboxNLStatus(songLink) {
     GM_xmlhttpRequest({
         method: "HEAD",
         url: songLink,
+        headers: { "referer": "https://animemusicquiz.com/" },
         onload: function(response) {
             isNLAvailable = response.status == 200
             displayCatboxStatus()
@@ -32,6 +33,7 @@ function checkCatboxNAStatus(songLink) {
     GM_xmlhttpRequest({
         method: "HEAD",
         url: songLink,
+        headers: { "referer": "https://animemusicquiz.com/" },
         onload: function(response) {
             isNAAvailable = response.status == 200
             displayCatboxStatus()
