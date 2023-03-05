@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Catbox NL check
-// @version      0.5
+// @version      0.6
 // @match        https://animemusicquiz.com/admin/approveVideos
 // @match        https://animemusicquiz.com/admin/approveVideos?skipMp3=true
 // @updateURL    https://github.com/Klemkinis/AMQ-Catbox-NL-check/raw/main/Catbox%20NL%20check.user.js
@@ -16,17 +16,18 @@ const status = {
     unavailable: "red"
 }
 
+var songLink = getSongLink()
+replaceVideoPreview()
 var naStatus = await checkCatboxNAStatus()
 var nlStatus = await checkCatboxNLStatus()
 displayCatboxStatus()
 
 async function checkCatboxNLStatus() {
-    var songLink = getSongLink().replace("files.", "nl.")
-    return checkStatus(songLink, amqDomain)
+    var nlLink = songLink.replace("files.", "nl.")
+    return checkStatus(nlLink, amqDomain)
 }
 
 async function checkCatboxNAStatus() {
-    var songLink = getSongLink()
     var linkStatus = await checkStatus(songLink, amqDomain)
     if (linkStatus != status.redirected) {
         return linkStatus
@@ -38,23 +39,23 @@ async function checkCatboxNAStatus() {
     }
 }
 
-async function checkStatus(songLink, referer) {
+async function checkStatus(url, referer) {
     return await new Promise(resolve => {
         GM_xmlhttpRequest({
             method: "HEAD",
-            url: songLink,
+            url: url,
             headers: { "referer": referer },
             onload: function(response) {
-                resolve(statusFrom(response, songLink))
+                resolve(statusFrom(response, url))
             }
         })
     })
 }
 
-function statusFrom(response, songLink) {
+function statusFrom(response, url) {
     if (response.status != 200) {
         return status.unavailable
-    } else if (response.finalUrl != songLink) {
+    } else if (response.finalUrl != url) {
         return status.redirected
     } else {
         return status.available
@@ -66,6 +67,10 @@ function displayCatboxStatus() {
     var statusRow = songInfoTable.insertRow()
     statusRow.insertCell(0).innerHTML = "Catbox"
     statusRow.insertCell(1).innerHTML = "<span style='color:" + nlStatus + "';>Europe</span> | <span style='color:" + naStatus + "';>America</span>"
+}
+
+function replaceVideoPreview() {
+    getVideoPlayer().src = songLink.replace("files.", "amq.").replace(".moe", ".video")
 }
 
 function getSongLink() {
