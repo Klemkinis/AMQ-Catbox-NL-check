@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Catbox NL check
-// @version      0.6
+// @version      0.7
 // @match        https://animemusicquiz.com/admin/approveVideos
 // @match        https://animemusicquiz.com/admin/approveVideos?skipMp3=true
 // @updateURL    https://github.com/Klemkinis/AMQ-Catbox-NL-check/raw/main/Catbox%20NL%20check.user.js
@@ -23,11 +23,13 @@ var nlStatus = await checkCatboxNLStatus()
 displayCatboxStatus()
 
 async function checkCatboxNLStatus() {
+    if (getVideoPlayer().src.includes("catbox") == false) { return }
     var nlLink = songLink.replace("files.", "nl.")
     return checkStatus(nlLink, amqDomain)
 }
 
 async function checkCatboxNAStatus() {
+    if (getVideoPlayer().src.includes("catbox") == false) { return }
     var linkStatus = await checkStatus(songLink, amqDomain)
     if (linkStatus != status.redirected) {
         return linkStatus
@@ -70,6 +72,7 @@ function displayCatboxStatus() {
 }
 
 function replaceVideoPreview() {
+    if (getVideoPlayer().src.includes("catbox") == false) { return }
     getVideoPlayer().src = songLink.replace("files.", "amq.").replace(".moe", ".video")
 }
 
